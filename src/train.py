@@ -170,5 +170,5 @@ class ProjectAgent:
 
 if __name__ == "__main__":
     agent = ProjectAgent()
-    agent.train(env, max_episode=50)
+    agent.train(env, max_episode=100)
 
