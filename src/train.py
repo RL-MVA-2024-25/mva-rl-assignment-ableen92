@@ -54,7 +54,7 @@ class PrioritizedReplayBuffer:
 
     def update_priorities(self, indices, priorities):
         for idx, priority in zip(indices, priorities):
-            self.priorities[idx] = priority
+            self.priorities[idx] = max(priority, 1e-5)  # Éviter les priorités nulles
 
     def __len__(self):
         return len(self.buffer)
@@ -135,7 +135,6 @@ class ProjectAgent:
 
             self.memory.update_priorities(indices, td_errors)
 
-
     def train(self, env, max_episode):
         beta = self.beta_start
         for episode in range(max_episode):
@@ -155,10 +154,14 @@ class ProjectAgent:
                 state = next_state
 
             print(f"Episode {episode + 1}, Reward: {total_reward}")
-            if total_reward > self.best_score:
-                self.best_score = total_reward
-                self.save(f"{self.model_name}.pth")
-                print(f"New best score: {self.best_score}")
+            # Évaluation périodique pour sauvegarder le meilleur modèle
+            if (episode + 1) % 10 == 0:
+                eval_score = evaluate_HIV(self, nb_episode=5)
+                print(f"Evaluation Score: {eval_score}")
+                if eval_score > self.best_score:
+                    self.best_score = eval_score
+                    self.save(f"{self.model_name}.pth")
+                    print(f"New best score: {self.best_score}")
 
     def save(self, path):
         torch.save(self.model.state_dict(), path)
@@ -168,8 +171,6 @@ class ProjectAgent:
         self.model.eval()
 
 
-
 if __name__ == "__main__":
     agent = ProjectAgent()
     agent.train(env, max_episode=150)
-
