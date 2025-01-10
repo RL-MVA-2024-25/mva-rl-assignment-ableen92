@@ -163,12 +163,13 @@ class ProjectAgent:
     def save(self, path):
         torch.save(self.model.state_dict(), path)
 
-    def load(self, path):
-        self.model.load_state_dict(torch.load(path, map_location=self.device))
+    def load(self):
+        self.model.load_state_dict(torch.load(f"{self.model_name}.pth", map_location=self.device))
         self.model.eval()
+
 
 
 if __name__ == "__main__":
     agent = ProjectAgent()
-    agent.train(env, max_episode=100)
+    agent.train(env, max_episode=15)
 
