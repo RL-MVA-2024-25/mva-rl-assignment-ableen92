@@ -180,7 +180,7 @@ class ProjectAgent:
 if __name__ == "__main__":
     config = {
         'model_name': 'best_agent', #best_agent_4
-        'max_episode': 1000,
+        'max_episode': 10,
         'hidden_size': 256,
         'depth': 5,
     }
