@@ -53,7 +53,7 @@ class ProjectAgent:
         # Valeurs par défaut
         default_config = {
             'max_episode': 1000,
-            'model_name': 'best_agent',
+            'model_name': 'trained_agent',
             'gamma': 0.95,
             'batch_size': 512,
             'buffer_size': 1000000,
@@ -183,7 +183,7 @@ class ProjectAgent:
 
 if __name__ == "__main__":
     config = {
-        'model_name': 'best_agent', 
+        'model_name': 'trained_agent', 
         'max_episode': 1500,
         'hidden_size': 256,
         'depth': 5,
