@@ -1,5 +1,5 @@
 from gymnasium.wrappers import TimeLimit
-from fast_env import FastHIVPatient
+from env_hiv import HIVPatient
 import numpy as np
 import torch
 import torch.nn as nn
@@ -12,7 +12,7 @@ import argparse
 
 # Initialisation de l'environnement
 env = TimeLimit(
-    env=FastHIVPatient(domain_randomization=True), max_episode_steps=200
+    env=HIVPatient(domain_randomization=True), max_episode_steps=200
 )
 
 class ReplayBuffer:
@@ -165,9 +165,9 @@ class ProjectAgent:
                     self.save(f"{os.getcwd()}/{self.model_name}.pth")
                     print(f"Best score updated: {best_score:.2e}")
                 if episode % 9 == 0:
-                    env = TimeLimit(env=FastHIVPatient(domain_randomization=False), max_episode_steps=200)   
+                    env = TimeLimit(env=HIVPatient(domain_randomization=False), max_episode_steps=200)   
                 if episode % 9 == 5:
-                    env = TimeLimit(env=FastHIVPatient(domain_randomization=True), max_episode_steps=200 )   
+                    env = TimeLimit(env=HIVPatient(domain_randomization=True), max_episode_steps=200 )   
                 state, _ = env.reset()
                 episode_cum_reward = 0
             else:
