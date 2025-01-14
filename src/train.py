@@ -1,5 +1,5 @@
 from gymnasium.wrappers import TimeLimit
-from env_hiv import HIVPatient
+from fast_env import FastHIVPatient
 import numpy as np
 import torch
 import torch.nn as nn
@@ -12,7 +12,7 @@ import argparse
 
 # Initialisation de l'environnement
 env = TimeLimit(
-    env=HIVPatient(domain_randomization=True), max_episode_steps=200
+    env=FastHIVPatient(domain_randomization=True), max_episode_steps=200
 )
 
 class ReplayBuffer:
@@ -58,7 +58,7 @@ class ProjectAgent:
             'batch_size': 512,
             'buffer_size': 1000000,
             'epsilon_max': 1.0,
-            'epsilon_min': 0.01,
+            'epsilon_min': 0.15,
             'epsilon_decay_period': 1000,
             'epsilon_delay_decay': 20,
             'hidden_size': 256,
@@ -131,9 +131,9 @@ class ProjectAgent:
         episode_return = []
         episode = 0
         episode_cum_reward = 0
-        state, _ = env.reset()
         epsilon = self.epsilon_max
         step = 0
+        state, _ = env.reset()
         best_score = 0
         while episode < max_episode:
             if step > self.epsilon_delay:
@@ -158,12 +158,16 @@ class ProjectAgent:
             step += 1
             if done or trunc:
                 episode += 1
-                print(f"Episode {episode}, epsilon {epsilon:.4f}, episode return {episode_cum_reward:.2f}")
-                score_agent = evaluate_HIV(agent=self, nb_episode=1)
-                if episode > self.delay_save and score_agent > best_score:
+                print(f"Episode {episode}, epsilon {epsilon:.4f}, episode return {episode_cum_reward:.2e}")
+                score_agent = evaluate_HIV(agent=self, nb_episode=5)
+                if score_agent > best_score: #episode > self.delay_save and
                     best_score = score_agent
                     self.save(f"{os.getcwd()}/{self.model_name}.pth")
                     print(f"Best score updated: {best_score:.2e}")
+                if episode % 9 == 0:
+                    env = TimeLimit(env=FastHIVPatient(domain_randomization=False), max_episode_steps=200)   
+                if episode % 9 == 5:
+                    env = TimeLimit(env=FastHIVPatient(domain_randomization=True), max_episode_steps=200 )   
                 state, _ = env.reset()
                 episode_cum_reward = 0
             else:
@@ -174,16 +178,19 @@ class ProjectAgent:
         torch.save(self.model.state_dict(), path)
 
     def load(self):
-        self.model.load_state_dict(torch.load(f"{os.getcwd()}/" + self.model_name + '.pth', map_location='cpu')) #os.getcwd()}/src/" 
+        self.model.load_state_dict(torch.load(f"{os.getcwd()}/" + self.model_name + '.pth', map_location='cpu'))#f"{os.getcwd()}/src/" + self.model_name + '.pth', map_location='cpu')
         self.model.eval()
 
 if __name__ == "__main__":
     config = {
-        'model_name': 'best_agent', #best_agent_4
-        'max_episode': 10,
+        'model_name': 'best_agent', 
+        'max_episode': 1500,
         'hidden_size': 256,
         'depth': 5,
     }
 
     agent = ProjectAgent(config)
     agent.train(env, config['max_episode'])
+
+
+
